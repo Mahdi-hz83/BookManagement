@@ -1,4 +1,4 @@
-package API
+package APIpackage
 
 import (
 	"New_Book_Management/Models"
@@ -23,9 +23,9 @@ func (bm *BookManagementAPI) AddBook(book Models.Book) error {
 	return result.Error
 }
 
-func (bm *BookManagementAPI) DeleteBook(isbn string) error {
+func (bm *BookManagementAPI) DeleteBook(isbn string) (int64, error) {
 	result := bm.DB.Delete(&Models.Book{}, "isbn = ?", isbn)
-	return result.Error
+	return result.RowsAffected, result.Error
 }
 
 func SetupRouter(apiBookManager *BookManagementAPI) *gin.Engine {
@@ -50,9 +50,14 @@ func SetupRouter(apiBookManager *BookManagementAPI) *gin.Engine {
 	})
 
 	router.DELETE("/books/:isbn", func(c *gin.Context) {
-		id := c.Param("isbn")
-		if err := apiBookManager.DeleteBook(id); err != nil {
+		isbn := c.Param("isbn")
+		rowsAffected, err := apiBookManager.DeleteBook(isbn)
+		if err != nil {
 			Responds.RespondWithInternalServerError(c, err.Error())
+			return
+		}
+		if rowsAffected == 0 {
+			Responds.RespondWithNotFound(c, "Book not found")
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "Book deleted successfully"})
