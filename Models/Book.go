@@ -13,4 +13,5 @@ type bookManager interface {
 	RetrieveBooks() ([]Book, error)
 	AddBook(book Book) error
 	DeleteBook(isbn string) (int64, error)
+	UpdateBook(isbn string, book Book) (int64, error)
 }
