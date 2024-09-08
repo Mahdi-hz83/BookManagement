@@ -28,6 +28,20 @@ func (bm *BookManagementAPI) DeleteBook(isbn string) (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
+func (bm *BookManagementAPI) UpdateBook(isbn string, UpdatedBook Models.Book) (int64, error) {
+	var book Models.Book
+	result := bm.DB.First(&book, "isbn = ?", isbn)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+
+	book.Title = UpdatedBook.Title
+	book.Price = UpdatedBook.Price
+
+	result = bm.DB.Save(&book)
+	return result.RowsAffected, result.Error
+}
+
 func SetupRouter(apiBookManager *BookManagementAPI) *gin.Engine {
 	router := gin.Default()
 	router.GET("/books", func(c *gin.Context) {
@@ -50,7 +64,7 @@ func SetupRouter(apiBookManager *BookManagementAPI) *gin.Engine {
 	})
 
 	router.DELETE("/books/:isbn", func(c *gin.Context) {
-		isbn := c.Param("isbn")
+		isbn := gettingISBN(c)
 		rowsAffected, err := apiBookManager.DeleteBook(isbn)
 		if err != nil {
 			Responds.RespondWithInternalServerError(c, err.Error())
@@ -63,5 +77,31 @@ func SetupRouter(apiBookManager *BookManagementAPI) *gin.Engine {
 		c.JSON(http.StatusOK, gin.H{"message": "Book deleted successfully"})
 	})
 
+	router.PUT("/books/:isbn", func(c *gin.Context) {
+		isbn := gettingISBN(c)
+		var updatedBook Models.Book
+		err := c.ShouldBindJSON(&updatedBook)
+		if err != nil {
+			Responds.RespondWithBadRequest(c, err.Error())
+			return
+		}
+
+		rowsAffected, err := apiBookManager.UpdateBook(isbn, updatedBook)
+		if err != nil {
+			Responds.RespondWithInternalServerError(c, err.Error())
+		}
+
+		if rowsAffected == 0 {
+			Responds.RespondWithNotFound(c, "Book not found")
+			return
+		}
+		Responds.RespondWithReturningData(c, updatedBook)
+	})
+
 	return router
+}
+
+func gettingISBN(c *gin.Context) string {
+	isbn := c.Param("isbn")
+	return isbn
 }
