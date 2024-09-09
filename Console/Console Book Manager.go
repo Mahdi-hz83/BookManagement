@@ -11,7 +11,7 @@ type BookManagementConsole struct {
 	DB *gorm.DB
 }
 
-func (bm *BookManagementConsole) RetrieveBooks() ([]Models.Book, error) {
+func (bm *BookManagementConsole) RetrieveAllBooks() ([]Models.Book, error) {
 	var books []Models.Book
 	result := bm.DB.Find(&books)
 	return books, result.Error
@@ -42,7 +42,7 @@ func (bm *BookManagementConsole) UpdateBook(isbn string, updatedBook Models.Book
 }
 
 func (bm *BookManagementConsole) ShowBooks() {
-	books, err := bm.RetrieveBooks()
+	books, err := bm.RetrieveAllBooks()
 	if err != nil {
 		fmt.Println("Error retrieving books:", err)
 		return
