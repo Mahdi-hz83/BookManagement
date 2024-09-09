@@ -17,6 +17,12 @@ func (bm *BookManagementConsole) RetrieveAllBooks() ([]Models.Book, error) {
 	return books, result.Error
 }
 
+func (bm *BookManagementConsole) RetrieveBookByISBN(isbn string) (Models.Book, error) {
+	var book Models.Book
+	result := bm.DB.First(&book, "isbn = ?", isbn)
+	return book, result.Error
+}
+
 func (bm *BookManagementConsole) AddBook(book Models.Book) error {
 	result := bm.DB.Create(&book)
 	return result.Error
@@ -58,6 +64,24 @@ func (bm *BookManagementConsole) ShowBooks() {
 	}
 }
 
+func (bm *BookManagementConsole) ShowBookByISBN() {
+	fmt.Print("Enter ISBN of the book to retrieve: ")
+	var isbn string
+	fmt.Scan(&isbn)
+
+	book, err := bm.RetrieveBookByISBN(isbn)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			fmt.Println("Book not found.")
+		} else {
+			fmt.Println("Error retrieving book:", err)
+		}
+		return
+	}
+
+	fmt.Printf("ISBN: %d, Title: %s, Price: %f\n", book.ISBN, book.Title, book.Price)
+}
+
 func (bm *BookManagementConsole) AddNewBook() {
 	var book Models.Book
 
@@ -93,6 +117,7 @@ func (bm *BookManagementConsole) RemoveBook() {
 		fmt.Println("Book deleted successfully.")
 	}
 }
+
 func (bm *BookManagementConsole) UpdateBookDetails() {
 	fmt.Print("Enter ISBN of the book to update: ")
 	var isbn string
