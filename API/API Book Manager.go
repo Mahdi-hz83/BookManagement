@@ -12,7 +12,7 @@ type BookManagementAPI struct {
 	DB *gorm.DB
 }
 
-func (bm *BookManagementAPI) RetrieveBooks() ([]Models.Book, error) {
+func (bm *BookManagementAPI) RetrieveAllBooks() ([]Models.Book, error) {
 	var books []Models.Book
 	result := bm.DB.Find(&books)
 	return books, result.Error
@@ -42,14 +42,34 @@ func (bm *BookManagementAPI) UpdateBook(isbn string, UpdatedBook Models.Book) (i
 	return result.RowsAffected, result.Error
 }
 
+func (bm *BookManagementAPI) RetrieveBookByISBN(isbn string) (Models.Book, error) {
+	var book Models.Book
+	result := bm.DB.First(&book, "isbn = ?", isbn)
+	return book, result.Error
+}
+
 func SetupRouter(apiBookManager *BookManagementAPI) *gin.Engine {
 	router := gin.Default()
 	router.GET("/books", func(c *gin.Context) {
-		books, err := apiBookManager.RetrieveBooks()
+		books, err := apiBookManager.RetrieveAllBooks()
 		if err != nil {
 			Responds.RespondWithInternalServerError(c, err.Error())
 		}
 		c.JSON(http.StatusOK, books)
+	})
+
+	router.GET("/books/:isbn", func(c *gin.Context) {
+		isbn := gettingISBN(c)
+		book, err := apiBookManager.RetrieveBookByISBN(isbn)
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				Responds.RespondWithNotFound(c, "Book not found")
+			} else {
+				Responds.RespondWithInternalServerError(c, err.Error())
+			}
+			return
+		}
+		Responds.RespondWithReturningData(c, book)
 	})
 
 	router.POST("/books", func(c *gin.Context) {
