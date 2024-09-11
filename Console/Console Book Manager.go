@@ -42,6 +42,7 @@ func (bm *BookManagementConsole) UpdateBook(isbn string, updatedBook Models.Book
 
 	book.Title = updatedBook.Title
 	book.Price = updatedBook.Price
+	book.Status = updatedBook.Status
 
 	result = bm.DB.Save(&book)
 	return result.RowsAffected, result.Error
@@ -60,7 +61,7 @@ func (bm *BookManagementConsole) ShowBooks() {
 	}
 
 	for _, book := range books {
-		log.Printf("ISBN: %d, Title: %s, Price: %f\n", book.ISBN, book.Title, book.Price)
+		log.Printf("ISBN: %d, Title: %s, Price: %f , Status: %s\n", book.ISBN, book.Title, book.Price, book.Status)
 	}
 }
 
@@ -79,7 +80,7 @@ func (bm *BookManagementConsole) ShowBookByISBN() {
 		return
 	}
 
-	fmt.Printf("ISBN: %d, Title: %s, Price: %f\n", book.ISBN, book.Title, book.Price)
+	fmt.Printf("ISBN: %d, Title: %s, Price: %f , Status: %s\n", book.ISBN, book.Title, book.Price, book.Status)
 }
 
 func (bm *BookManagementConsole) AddNewBook() {
@@ -91,6 +92,8 @@ func (bm *BookManagementConsole) AddNewBook() {
 	fmt.Scan(&book.Title)
 	fmt.Print("Enter Price: ")
 	fmt.Scan(&book.Price)
+	fmt.Print("Enter Status: ")
+	fmt.Scan(&book.Status)
 
 	if err := bm.AddBook(book); err != nil {
 		fmt.Println("Error adding book:", err)
@@ -128,6 +131,8 @@ func (bm *BookManagementConsole) UpdateBookDetails() {
 	fmt.Scan(&updatedBook.Title)
 	fmt.Print("Enter new Price: ")
 	fmt.Scan(&updatedBook.Price)
+	fmt.Print("Enter New Status: ")
+	fmt.Scan(&updatedBook.Status)
 
 	rowsAffected, err := bm.UpdateBook(isbn, updatedBook)
 	if err != nil {
