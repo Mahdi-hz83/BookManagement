@@ -37,6 +37,7 @@ func (bm *BookManagementAPI) UpdateBook(isbn string, UpdatedBook Models.Book) (i
 
 	book.Title = UpdatedBook.Title
 	book.Price = UpdatedBook.Price
+	book.Status = UpdatedBook.Status
 
 	result = bm.DB.Save(&book)
 	return result.RowsAffected, result.Error
