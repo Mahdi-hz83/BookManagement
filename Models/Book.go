@@ -4,9 +4,10 @@ import "gorm.io/gorm"
 
 type Book struct {
 	gorm.Model
-	ISBN  uint `gorm:"primaryKey"`
-	Title string
-	Price float32
+	ISBN   uint `gorm:"primaryKey"`
+	Title  string
+	Price  float32
+	Status string
 }
 
 type bookManager interface {

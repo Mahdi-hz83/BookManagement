@@ -10,11 +10,17 @@ import (
 
 func main() {
 	Database.ConnectDatabase()
-	// For Console Mode:
-	//runConsoleApp()
+	fmt.Println("Which App Do You Want To Use?\n1.Web\n2.Console\n:")
+	var choice int
+	fmt.Scan(&choice)
+	switch choice {
+	case 1:
+		runAPIApp()
 
-	// For API Mode:
-	runAPIApp()
+	case 2:
+		runConsoleApp()
+	}
+
 }
 
 func runConsoleApp() {
